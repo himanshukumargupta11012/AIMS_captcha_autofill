@@ -1,0 +1,17 @@
+{
+    "name": "Captcha Autofiller",
+    "manifest_version": 3,
+    "version": "1.0",
+    "description": "Captcha auto filler for IITH AIMS portal",
+    "content_scripts": [
+        {
+            "matches": ["https://aims.iith.ac.in/aims/"],
+            "js": ["first_page.js"]
+        }
+        ,
+        {
+            "matches": ["https://aims.iith.ac.in/aims/login/loginHome"],
+            "js": ["second_page.js"]
+        }
+    ]
+}
