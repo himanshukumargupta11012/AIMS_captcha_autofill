@@ -13,12 +13,11 @@ reading = () => {
     ctx.drawImage(image2, 0, 0);
 
     const img_data = canvas.toDataURL();
-    console.log(img_data + " gfg")
     api_fetch(img_data);
 }
 
 const api_fetch = async (img_data) => {
-    api_url = "http://127.0.0.1:5000/";
+    api_url = "https://aims-captcha-reader-api.onrender.com";
     const response = await fetch(api_url, {
         method: "POST",
         headers: {
@@ -28,7 +27,6 @@ const api_fetch = async (img_data) => {
     })
     const result = await response.json();
 
-    console.log(result.captcha_value);
     captcha_input.value = result.captcha_value
 
     submit_btn.click()
