@@ -1,6 +1,6 @@
 # AIMS_captcha_autofill
 
-Autofills the captcha of IIT Hyderabad AIMS portal using AI.
+Autofills the captcha of IIT Hyderabad AIMS portal using image segmentation followed by letter and digit recognition.
 
 
 ### Installation
@@ -13,7 +13,10 @@ If you want to test the whole code then clone the repository, load the aims_capt
 
 Then you have to create a virtual environment. You can see online on how to do so
 
-Then run pip install -r requirements.txt to download necessary packages.
+Then run following command to download necessary packages
+```bash
+pip install -r requirements.txt
+```
 
 Then run .ipynb file in flask-api folder which will train the model.
 
