@@ -17,7 +17,7 @@ reading = () => {
 }
 
 const api_fetch = async (img_data) => {
-    api_url = "https://aims-captcha-reader-api.onrender.com";
+    api_url = "http://127.0.0.1:5000/";
     const response = await fetch(api_url, {
         method: "POST",
         headers: {

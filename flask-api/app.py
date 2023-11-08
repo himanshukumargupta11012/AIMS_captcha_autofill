@@ -4,16 +4,16 @@ import numpy as np
 import base64
 from PIL import Image
 from io import BytesIO
-import cv2
 import onnxruntime
 
 app = Flask(__name__)
 CORS(app)
 
-ort_session = onnxruntime.InferenceSession("captcha_reader_model.onnx")
+ort_session = onnxruntime.InferenceSession("captcha_reader_model5.onnx")
 
 @app.route('/', methods=["POST"])
 def main_func():
+
     # get image data
     data = request.get_json()
     base64_data = data.get('image', None)
@@ -28,23 +28,25 @@ def main_func():
         image = Image.open(BytesIO(image_bytes))
     except:
         return jsonify({"captcha_value": "Image Not found"})
-    image = np.array(image)
-
-    # preprocess
-    process_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    threshold, process_image = cv2.threshold(process_image, 0, 255, cv2.THRESH_OTSU)
+    
+    # preprocessing
+    threshold = 192
+    process_image = np.array(image)
+    process_image = np.mean(process_image, axis=-1)
+    process_image = np.where(process_image < threshold, 0, 255).astype(np.uint8)
+    
+    # separating each letter
     img_list = separate(process_image)
+
     # loading classifier
+    np_arr = np.array(img_list).reshape(5, 1, 28, 28)
+    ort_inputs = {'input.1': np_arr.astype('float32')}
 
-    ans = ""
-    for i in range(len(img_list)):
+    val = ort_session.run(None, ort_inputs)
+    output = np.argmax(val, axis=-1)[0]
 
-        np_arr = img_list[i].reshape(1, 1, 28, 28)
-        ort_inputs = {'input.1': np_arr.astype('float32')}
+    ans = "".join([int2label_dict[i] for i in output])
 
-        val = ort_session.run(None, ort_inputs)
-        out = np.argmax(val)
-        ans += int2label_dict[out.item()]
     return jsonify({"captcha_value": ans})
 
     
@@ -58,6 +60,7 @@ def separate(full_image):
     for i in range(full_image[0].shape[0]):
 
         if np.all(full_image[:, i] < 127) and not prev:
+
             arr.append(i)
             prev = True
             prev2 = False
@@ -98,8 +101,10 @@ def separate(full_image):
         else:
             image = np.pad(image, ((pad_size - pad_width, pad_size - pad_width), (pad_size, pad_size)), mode="constant")
         # ----------
-        
-        resized_image = cv2.resize(image, (28, 28), cv2.INTER_CUBIC)
+
+        image = Image.fromarray(image)
+        resized_image = image.resize((28, 28))
+        resized_image = np.array(resized_image)
         crop_img.append(resized_image)
 
     return crop_img
@@ -119,8 +124,6 @@ for i in range(62):
 int2label_dict = {}
 for key in label2int_dict:
     int2label_dict[label2int_dict[key]] = key
-
-
 
 
 if __name__ == "__main__":
